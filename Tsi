@@ -1,0 +1,11 @@
+// services/forgeAIService.ts
+import axios from "axios";
+
+const AI = "http://localhost:8000";
+
+export const ForgeAI = {
+  blueprints: (config:any) => axios.post(`${AI}/blueprints`, config).then(r=>r.data),
+  costs:      (config:any) => axios.post(`${AI}/cost-estimation`, config).then(r=>r.data),
+  marketing:  (config:any) => axios.post(`${AI}/marketing`, config).then(r=>r.data),
+  testdrive:  (payload:any) => axios.post(`${AI}/testdrive`, payload).then(r=>r.data),
+};
