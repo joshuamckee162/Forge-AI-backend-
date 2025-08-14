@@ -1,0 +1,23 @@
+{
+  "config": {
+    "type": "military",
+    "power": "diesel",
+    "sixBySix": true,
+    "armor": 0.5,
+    "wheelScale": 1.1,
+    "lift": 0.12,
+    "resealTires": true,
+    "pepperSpray": true,
+    "tazerHandles": true,
+    "sleeper": true,
+    "snorkels": true,
+    "tacticalLights": true
+  },
+  "seconds": 20,
+  "dt": 0.05,
+  "terrain": "desert",
+  "grade_pct": 2.0,
+  "wind_mps": -2.0,
+  "target_speed_kmh": 110,
+  "mode": "mixed"
+}
