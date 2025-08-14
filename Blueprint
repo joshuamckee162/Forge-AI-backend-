@@ -1,0 +1,25 @@
+import { VehicleConfig, BlueprintPart } from "./types.js";
+
+export function generateBlueprints(cfg: VehicleConfig): BlueprintPart[] {
+  const parts = [
+    "Engine/Power Module", "Gearbox/Transmission", "Suspension (coil-over)",
+    "6x6 Axle Pack", "Armor Panels", "Door & Security System",
+    "Sleeper Kit Pod", "Cabin Electronics + 32\" TV",
+    "Lighting (UV/IR/White)", "Snorkel + Semi Stacks",
+    "Pepper Spray Dispenser Roof", "Resealing Tires Kit"
+  ];
+  return parts.map((p, i) => ({
+    id: i + 1,
+    name: p,
+    status: "Ready",
+    spec: `${p} • Variant tuned for ${cfg.type} • Powertrain: ${cfg.power}`
+  }));
+}
+
+export function compileVehicleBlueprint(cfg: VehicleConfig) {
+  return {
+    title: `AutoGenesis ${cfg.type} ${cfg.sixBySix ? "6x6":"4x4"}`,
+    summary: `Full vehicle model with ${cfg.power} powertrain, armor=${cfg.armor}, lift=${cfg.lift}`,
+    parts: generateBlueprints(cfg)
+  };
+}
