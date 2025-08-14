@@ -1,0 +1,38 @@
+import { VehicleConfig, TelemetryPoint } from "./types.js";
+
+/** Simple physics approx to power a front-end driving viz.
+ * Not a full physics engine; returns telemetry arrays you can feed to a 3D view.
+ */
+export function simulateStraightRun(cfg: VehicleConfig, seconds = 15): TelemetryPoint[] {
+  const dt = 0.05;
+  const points: TelemetryPoint[] = [];
+  const massBase = cfg.type === "hypercar" ? 1600 : cfg.type === "military" ? 3500 : 2400;
+  const armorMass = cfg.armor * 800;
+  const drivetrainMass = cfg.sixBySix ? 250 : 0;
+  const mass = massBase + armorMass + drivetrainMass;
+
+  const powerKW = cfg.power === "electric" ? 450 : cfg.power === "diesel" ? 300 : cfg.power === "solar" ? 180 : 260; // kilowatts
+  const maxForce = (powerKW * 1000) / 20; // assume peak at ~20 m/s
+  const dragCoef = cfg.type === "hypercar" ? 0.28 : 0.42;
+  const area = cfg.type === "hypercar" ? 2.0 : 2.8;
+  const rho = 1.225;
+
+  let v = 0, s = 0, t = 0;
+  for (let i=0; i<seconds/dt; i++) {
+    const Fdrag = 0.5 * rho * dragCoef * area * v * v;
+    const F = Math.max(0, maxForce - Fdrag);
+    const a = F / mass;
+    v = v + a * dt;
+    s = s + v * dt;
+    t = t + dt;
+    points.push({ t, v, a, s });
+  }
+  return points;
+}
+
+export function brakingDistance(cfg: VehicleConfig, v0_kmh: number) {
+  const v0 = v0_kmh / 3.6;
+  const mu = cfg.tacticalLights ? 0.85 : 0.75;
+  const g = 9.81;
+  return (v0*v0)/(2*mu*g);
+}
