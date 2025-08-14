@@ -1,0 +1,8 @@
+# backend/main.py
+from fastapi import FastAPI
+from routes import frontend_api
+
+app = FastAPI()
+
+# Attach frontend routes
+app.include_router(frontend_api.router)
