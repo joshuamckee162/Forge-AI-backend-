@@ -1,0 +1,40 @@
+# backend/routes/frontend_api.py
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from forge_ai import generate_vehicle_blueprints, estimate_vehicle_cost, generate_marketing_plan, run_test_drive
+
+router = APIRouter()
+
+class VehicleConfig(BaseModel):
+    engine: str
+    color: str
+    features: list
+    materials: dict
+
+@router.post("/ai/blueprints")
+def api_blueprints(config: VehicleConfig):
+    try:
+        return generate_vehicle_blueprints(config.dict())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/ai/cost-estimation")
+def api_cost(config: VehicleConfig):
+    try:
+        return estimate_vehicle_cost(config.dict())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/ai/marketing")
+def api_marketing(config: VehicleConfig):
+    try:
+        return generate_marketing_plan(config.dict())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/ai/test-drive")
+def api_test_drive(config: VehicleConfig):
+    try:
+        return run_test_drive(config.dict())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
