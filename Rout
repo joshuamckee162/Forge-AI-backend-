@@ -1,0 +1,26 @@
+import express from 'express';
+import { generateBlueprints, calculateCosts, generateMarketing, simulateTestDrive } from '../services/forgeAIService.js';
+
+const router = express.Router();
+
+router.post('/generate-blueprints', async (req, res) => {
+    const data = await generateBlueprints(req.body);
+    res.json(data);
+});
+
+router.post('/calculate-costs', async (req, res) => {
+    const result = await calculateCosts(req.body);
+    res.json(result);
+});
+
+router.post('/generate-marketing', async (req, res) => {
+    const material = await generateMarketing(req.body);
+    res.json(material);
+});
+
+router.post('/simulate-testdrive', async (req, res) => {
+    const simData = await simulateTestDrive(req.body);
+    res.json(simData);
+});
+
+export default router;
