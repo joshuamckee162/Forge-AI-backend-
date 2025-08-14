@@ -1,0 +1,6 @@
+export const Plans = {
+  free: { priceYear: 0, features: ["2D editor", "1 project", "basic AI"] },
+  pro: { priceYear: 25, features: ["3D editor", "10 projects", "AI blueprints", "cost estimator"] },
+  premium: { priceYear: 45, features: ["Unlimited projects", "Forge test drive", "marketing AI"] },
+  corporate: { priceYear: 160, features: ["8 seats", "admin oversight", "SSO/2FA", "priority support"] }
+} as const;
