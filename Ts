@@ -1,0 +1,44 @@
+import argon2 from "argon2";
+import jwt from "jsonwebtoken";
+import { randomBytes, createCipheriv, createDecipheriv } from "crypto";
+import speakeasy from "speakeasy";
+
+const JWT_SECRET = process.env.FORGE_JWT_SECRET || "dev-secret-change-me";
+const ENC_KEY = (process.env.FORGE_ENC_KEY || "0123456789abcdef0123456789abcdef"); // 32 bytes
+const IV_LEN = 16;
+
+export type Account = {
+  id: string;
+  email: string;
+  passwordHash: string;
+  role: "free" | "pro" | "premium" | "corporate" | "admin";
+  totpSecret?: string; // for 2FA
+};
+
+export async function hashPassword(pw: string) {
+  return argon2.hash(pw, { type: argon2.argon2id });
+}
+
+export async function verifyPassword(hash: string, pw: string) {
+  return argon2.verify(hash, pw);
+}
+
+export function issueJWT(payload: object, ttl = "12h") {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: ttl });
+}
+
+export function verifyJWT(token: string) {
+  return jwt.verify(token, JWT_SECRET);
+}
+
+export function encrypt(text: string) {
+  const iv = randomBytes(IV_LEN);
+  const cipher = createCipheriv("aes-256-cbc", Buffer.from(ENC_KEY, "utf8"), iv);
+  let enc = cipher.update(text, "utf8", "base64");
+  enc += cipher.final("base64");
+  return iv.toString("base64") + ":" + enc;
+}
+
+export function decrypt(payload: string) {
+  const [ivB64, data] = payload.split(":");
+  const iv = Buffer.from(ivB64
