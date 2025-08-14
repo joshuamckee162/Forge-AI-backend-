@@ -1,0 +1,18 @@
+import { VehicleConfig, MarketingPack } from "./types.js";
+import { estimateCosts } from "./costEngine.js";
+
+export function marketingPack(cfg: VehicleConfig): MarketingPack {
+  const costs = estimateCosts(cfg);
+  const name = cfg.type === "hypercar" ? "HyperVolt" : cfg.type === "military" ? "Outrider" : "TrailForge";
+  const tagline = cfg.type === "military" ? "Built for the mission. Ready for the unknown." : cfg.type === "hypercar" ? "Zero to awe in 2.8." : "From commute to cataclysm.";
+  return {
+    productName: `${name} ${cfg.sixBySix ? "6x6":"4x4"}`,
+    tagline,
+    blurb: `Forge AI designed the ${name} using ${cfg.power} powertrain, ${cfg.sixBySix ? "triple locked 6x6" : "advanced 4x4"} drive, armor ${Math.round(cfg.armor*10)}. Retail guidance: $${costs.retail.toLocaleString()}.`,
+    socials: [
+      `Meet ${name}: AI-forged performance with ${cfg.sixBySix? "6x6 traction" : "adaptive 4x4"}.`,
+      `From blueprint to road test in minutes — Forge AI.`,
+      `Armor ${Math.round(cfg.armor*10)} • Sleeper kit ${cfg.sleeper? "yes":"no"} • ${cfg.power} drivetrain.`
+    ]
+  };
+}
