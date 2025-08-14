@@ -1,0 +1,79 @@
+import express from "express";
+import cors from "cors";
+import { v4 as uuid } from "uuid";
+import { VehicleConfigSchema } from "./types.js";
+import { estimateCosts } from "./costEngine.js";
+import { generateBlueprints, compileVehicleBlueprint } from "./blueprints.js";
+import { marketingPack } from "./marketing.js";
+import { simulateStraightRun, brakingDistance } from "./testDrive.js";
+import { hashPassword, verifyPassword, issueJWT, createTotpSecret, verifyTotp } from "./auth.js";
+import { Plans } from "./plans.js";
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// In-memory demo storage (replace with DB)
+const USERS: any = {};
+
+app.get("/health", (_,res)=> res.json({ ok: true, service: "forge-ai" }));
+
+// --- Auth & Accounts ---
+app.post("/auth/register", async (req,res)=>{
+  const { email, password, role = "free" } = req.body;
+  if(USERS[email]) return res.status(400).json({ error: "exists" });
+  const passwordHash = await hashPassword(password);
+  const id = uuid();
+  const totp = createTotpSecret(email);
+  USERS[email] = { id, email, passwordHash, role, totpSecret: totp.ascii };
+  res.json({ id, email, role, totpUri: totp.otpauth_url });
+});
+
+app.post("/auth/login", async (req,res)=>{
+  const { email, password, totp } = req.body;
+  const u = USERS[email];
+  if(!u) return res.status(400).json({ error: "no_user" });
+  const ok = await verifyPassword(u.passwordHash, password);
+  if(!ok) return res.status(401).json({ error: "bad_password" });
+  if(!verifyTotp(totp, u.totpSecret)) return res.status(401).json({ error: "bad_totp" });
+  const token = issueJWT({ sub: u.id, email, role: u.role });
+  res.json({ token, user: { id: u.id, email, role: u.role } });
+});
+
+app.get("/plans", (_,_res)=> _res.json(Plans));
+
+// --- Core AI endpoints ---
+app.post("/ai/costs", (req,res)=>{
+  const parse = VehicleConfigSchema.safeParse(req.body);
+  if(!parse.success) return res.status(400).json({ error: parse.error });
+  return res.json(estimateCosts(parse.data));
+});
+
+app.post("/ai/blueprints", (req,res)=>{
+  const parse = VehicleConfigSchema.safeParse(req.body);
+  if(!parse.success) return res.status(400).json({ error: parse.error });
+  return res.json({ parts: generateBlueprints(parse.data), vehicle: compileVehicleBlueprint(parse.data) });
+});
+
+app.post("/ai/marketing", (req,res)=>{
+  const parse = VehicleConfigSchema.safeParse(req.body);
+  if(!parse.success) return res.status(400).json({ error: parse.error });
+  return res.json(marketingPack(parse.data));
+});
+
+app.post("/ai/testdrive/run", (req,res)=>{
+  const parse = VehicleConfigSchema.safeParse(req.body);
+  const seconds = Number(req.query.seconds || 15);
+  if(!parse.success) return res.status(400).json({ error: parse.error });
+  return res.json({ telemetry: simulateStraightRun(parse.data, seconds) });
+});
+
+app.post("/ai/testdrive/brake", (req,res)=>{
+  const parse = VehicleConfigSchema.safeParse(req.body);
+  const v0 = Number(req.query.v0 || 100);
+  if(!parse.success) return res.status(400).json({ error: parse.error });
+  return res.json({ distance_m: brakingDistance(parse.data, v0) });
+});
+
+const port = process.env.PORT || 8080;
+app.listen(port, ()=> console.log(`Forge AI API running on :${port}`));
