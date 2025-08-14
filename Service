@@ -1,0 +1,22 @@
+import axios from 'axios';
+
+export async function generateBlueprints(vehicleSpecs) {
+    // Calls Python AI service for blueprint generation
+    const res = await axios.post('http://localhost:8000/blueprints', vehicleSpecs);
+    return res.data;
+}
+
+export async function calculateCosts(vehicleSpecs) {
+    const res = await axios.post('http://localhost:8000/cost-estimation', vehicleSpecs);
+    return res.data;
+}
+
+export async function generateMarketing(vehicleSpecs) {
+    const res = await axios.post('http://localhost:8000/marketing', vehicleSpecs);
+    return res.data;
+}
+
+export async function simulateTestDrive(vehicleSpecs) {
+    const res = await axios.post('http://localhost:8000/testdrive', vehicleSpecs);
+    return res.data;
+}
