@@ -1,0 +1,26 @@
+import { VehicleConfig, CostEstimate } from "./types.js";
+
+const FEATURE_TABLE = {
+  armor: (v:number) => v * 3500,
+  sixBySix: (v:boolean) => (v ? 9500 : 0),
+  resealTires: (v:boolean) => (v ? 1800 : 0),
+  pepperSpray: (v:boolean) => (v ? 1200 : 0),
+  tazerHandles: (v:boolean) => (v ? 900 : 0),
+  sleeper: (v:boolean) => (v ? 6500 : 0),
+  snorkels: (v:boolean) => (v ? 1100 : 0),
+  tacticalLights: (v:boolean) => (v ? 750 : 0)
+} as const;
+
+export function estimateCosts(cfg: VehicleConfig): CostEstimate {
+  const base = cfg.type === "hypercar" ? 48000 : cfg.type === "military" ? 42000 : 28000;
+  const powertrain = cfg.power === "electric" ? 16000 : cfg.power === "diesel" ? 9000 : cfg.power === "solar" ? 22000 : 8000;
+  const labor = 120 * 65;
+  const features = Object.entries(FEATURE_TABLE).reduce((sum, [k, fn]) => sum + (fn as any)((cfg as any)[k] || 0), 0);
+  const complexity = (cfg.wheelScale - 1) * 3000 + cfg.lift * 2000;
+  const subtotal = base + powertrain + labor + features + complexity;
+  const overhead = subtotal * 0.12;
+  const factory = Math.round(subtotal + overhead);
+  const retail = Math.round(factory * 1.65);
+  const fleet = Math.round(factory * 1.3);
+  return { factory, retail, fleet };
+}
