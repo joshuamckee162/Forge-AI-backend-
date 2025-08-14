@@ -1,0 +1,3 @@
+curl -X POST http://localhost:8080/ai/costs \
+  -H 'Content-Type: application/json' \
+  -d '{"type":"military","power":"diesel","sixBySix":true,"armor":0.5,"wheelScale":1.1,"lift":0.1,"resealTires":true,"pepperSpray":true,"tazerHandles":true,"sleeper":true,"snorkels":true,"tacticalLights":true}'
